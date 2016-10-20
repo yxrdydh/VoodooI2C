@@ -207,9 +207,3 @@ public:
 
 
 #endif
-i2c_hid *ihid);
-
-};
-
-
-#endif
