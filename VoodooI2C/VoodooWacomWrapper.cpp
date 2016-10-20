@@ -25,7 +25,7 @@ bool VoodooWacomWrapper::start(IOService *provider) {
         return false;
     
     IOLog("VoodooI2C: %s, line %d\n", __FILE__, __LINE__);
-    setProperty("HIDDefaultBehavior", OSString::withCString("Trackpad"));
+    setProperty("HIDDefaultBehavior", OSString::withCString("TouchScreen"));
     return IOHIDDevice::start(provider);
 }
 
@@ -64,7 +64,7 @@ IOReturn VoodooWacomWrapper::handleReport(
 
 OSString* VoodooWacomWrapper::newManufacturerString() const {
     IOLog("VoodooI2C: %s, line %d\n", __FILE__, __LINE__);
-    return OSString::withCString("Lynx Point");
+    return OSString::withCString("Sunrise Point");
 }
 
 OSNumber* VoodooWacomWrapper::newPrimaryUsageNumber() const {
