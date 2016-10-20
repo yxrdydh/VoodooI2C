@@ -28,8 +28,6 @@
 #define I2C_HID_PWR_ON 0x00
 #define I2C_HID_PWR_SLEEP 0x01
 
-#define WACOM_PEN_DOWN 0x21
-
 
 class VoodooI2C;
 class VoodooHIDWrapper;
@@ -39,13 +37,13 @@ class VoodooI2CHIDDevice : public VoodooI2CDevice
 {
     typedef IOService super;
     OSDeclareDefaultStructors(VoodooI2CHIDDevice);
-
+    
 private:
     VoodooHIDWrapper* _wrapper;
-
+    
     void initialize_wrapper(void);
     void destroy_wrapper(void);
-
+    
 protected:
     VoodooI2C* _controller;
     
@@ -156,7 +154,7 @@ public:
 .registerIndex = offsetof(struct i2c_hid_desc, wCommandRegister)
     };
     struct i2c_hid_cmd hid_reset_cmd = { I2C_HID_CMD(0x01),
-                                        .wait = true
+        .wait = true
     };
     
     struct i2c_hid_cmd hid_descr_cmd = { .length = 2};
@@ -204,6 +202,12 @@ public:
     int i2c_get_slave_address(I2CDevice* hid_device);
     
     bool i2c_hid_hwreset(i2c_hid *ihid);
+    
+};
+
+
+#endif
+i2c_hid *ihid);
 
 };
 
