@@ -28,6 +28,8 @@
 #define I2C_HID_PWR_ON 0x00
 #define I2C_HID_PWR_SLEEP 0x01
 
+#define WACOM_PEN_DOWN 0x21
+
 
 class VoodooI2C;
 class VoodooHIDWrapper;

@@ -420,12 +420,17 @@ void VoodooI2CHIDDevice::i2c_hid_get_input(OSObject* owner, IOTimerEventSource* 
     for (int i = 0; i < rsize; i++)
         IOLog("0x%02x ", (UInt8) rdesc[i]);
     IOLog("\n");
+    
+    if (rdesc[3] == WACOM_PEN_DOWN) {
+        rdesc[8] = rdesc[8] * .5;
+        rdesc[9] = rdesc[9] * .5;
+    }
 
     int return_size = rdesc[0] | rdesc[1] << 8;
     if (return_size == 0) {
         /* host or device initiated RESET completed */
         // test/clear bit?
-        hid_device->timerSource->setTimeoutMS(10);
+        hid_device->timerSource->setTimeoutMS(5);
         return;
     }
 
@@ -444,7 +449,7 @@ void VoodooI2CHIDDevice::i2c_hid_get_input(OSObject* owner, IOTimerEventSource* 
 
     IOFree(rdesc, rsize);
     
-    hid_device->timerSource->setTimeoutMS(10);
+    hid_device->timerSource->setTimeoutMS(5);
 }
 
 bool VoodooI2CHIDDevice::i2c_hid_get_report_descriptor(i2c_hid *ihid){
