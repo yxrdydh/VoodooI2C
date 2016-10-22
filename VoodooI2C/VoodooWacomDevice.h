@@ -29,6 +29,10 @@
 #define I2C_HID_PWR_SLEEP 0x01
 
 #define WACOM_PEN_DOWN 0x21
+#define WACOM_FINGERTOUCH 0x2a
+#define WACOM_SINGLETOUCH 0x01
+#define WACOM_TWOTOUCH 0x02
+#define WACOM_THREETOUCH 0x03
 
 
 class VoodooI2C;
@@ -204,6 +208,10 @@ public:
     int i2c_get_slave_address(I2CDevice* hid_device);
     
     bool i2c_hid_hwreset(i2c_hid *ihid);
+    
+    UInt16 compareInputx;
+    UInt16 compareInputy;
+    int compareReportCounter = 0;
     
 };
 
