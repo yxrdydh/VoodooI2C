@@ -19,6 +19,7 @@
 #include <IOKit/IOCommandGate.h>
 #include <IOKit/IOTimerEventSource.h>
 #include "VoodooI2CDevice.h"
+#include "csgesture.h"
 
 #define __le16 UInt16
 #define __le32 UInt32
@@ -45,7 +46,8 @@ class VoodooWacomDevice : public VoodooI2CDevice
     OSDeclareDefaultStructors(VoodooWacomDevice);
     
 private:
-    VoodooWacomWrapper* _wrapper;
+    CSGesture* _wrapper;
+    VoodooWacomWrapper* _wacwrapper;
     
     void initialize_wrapper(void);
     void destroy_wrapper(void);
@@ -182,6 +184,8 @@ public:
     int initHIDDevice(I2CDevice *hid_device);
     
     int i2c_hid_acpi_pdata(i2c_hid *ihid);
+    
+    struct csgesture_softc softc;
     
     int i2c_hid_alloc_buffers(i2c_hid *ihid, UInt report_size);
     

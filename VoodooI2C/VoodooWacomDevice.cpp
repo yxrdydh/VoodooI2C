@@ -198,28 +198,28 @@ err:
 }
 
 void VoodooWacomDevice::initialize_wrapper(void) {
-    destroy_wrapper();
+    _wrapper = new CSGesture;
+    _wrapper->vendorID = 'nalE';
+    _wrapper->productID = 'dptE';
+    _wrapper->softc = &softc;
+    _wrapper->initialize_wrapper(this);
+
     
-    IOLog("VoodooI2C: %s, line %d\n", __FILE__, __LINE__);
-    _wrapper = new VoodooWacomWrapper;
-    if (_wrapper->init()) {
-        IOLog("VoodooI2C: %s, line %d\n", __FILE__, __LINE__);
-        _wrapper->attach(this);
-        _wrapper->start(this);
+    _wacwrapper = new VoodooWacomWrapper;
+    if (_wacwrapper->init()) {
+        _wacwrapper->attach(this);
+        _wacwrapper->start(this);
     }
     else {
-        IOLog("VoodooI2C: %s, line %d\n", __FILE__, __LINE__);
-        _wrapper->release();
-        _wrapper = NULL;
+        _wacwrapper->release();
+        _wacwrapper = NULL;
     }
 }
 
 void VoodooWacomDevice::destroy_wrapper(void) {
-    if (_wrapper != NULL) {
-        _wrapper->terminate(kIOServiceRequired | kIOServiceSynchronous);
-        _wrapper->release();
-        _wrapper = NULL;
-    }
+        _wrapper->destroy_wrapper();
+        _wacwrapper->release();
+        _wacwrapper = NULL;
 }
 
 int VoodooWacomDevice::i2c_hid_acpi_pdata(i2c_hid *ihid) {
@@ -431,8 +431,8 @@ void VoodooWacomDevice::i2c_hid_get_input(OSObject* owner, IOTimerEventSource* s
             compareInputy = rtempy;
             
             if (compareReportCounter >= 120) {
-                
-                IOLog("Send Right Click...\n");
+                _wrapper->update_relative_mouse(0x2, 0, 0, 0, 0);
+                _wrapper->update_relative_mouse(0x0, 0, 0, 0, 0);
                 compareInputx = 0;
                 compareInputy = 0;
                 compareReportCounter = 0;
@@ -467,7 +467,7 @@ void VoodooWacomDevice::i2c_hid_get_input(OSObject* owner, IOTimerEventSource* s
     IOBufferMemoryDescriptor *buffer = IOBufferMemoryDescriptor::inTaskWithOptions(kernel_task, 0, return_size);
     buffer->writeBytes(0, rdesc + 2, return_size - 2);
     
-    IOReturn err = _wrapper->handleReport(buffer, kIOHIDReportTypeInput);
+    IOReturn err = _wacwrapper->handleReport(buffer, kIOHIDReportTypeInput);
     if (err != kIOReturnSuccess)
         IOLog("Error handling report: 0x%.8x\n", err);
     
