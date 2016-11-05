@@ -424,7 +424,7 @@ void VoodooWacomDevice::i2c_hid_get_input(OSObject* owner, IOTimerEventSource* s
     UInt16 rtempx = rdesc[9] | rdesc[8] << 8;
     UInt16 rtempy = rdesc[11] | rdesc[10] << 8;
     
-    if (rdesc[0] == WACOM_FINGERTOUCH && rdesc[4] == WACOM_SINGLETOUCH) {
+    if (rdesc[2] == WACOM_FINGERTOUCH && rdesc[4] == WACOM_SINGLETOUCH) {
         if (rtempx == compareInputx && rtempy == compareInputy) {
             compareReportCounter = compareReportCounter + 1;
             compareInputx = rtempx;
@@ -463,16 +463,31 @@ void VoodooWacomDevice::i2c_hid_get_input(OSObject* owner, IOTimerEventSource* s
         IOLog("%s: Incomplete report %d/%d\n", __func__, rsize, return_size);
     }
     
-    
-    
-    
-    writeInputReportToBuffer(rdesc, return_size);
+    if ((rdesc[2]==WACOM_FINGERTOUCH && rdesc[4]==WACOM_SINGLETOUCH) or (rdesc[2]==WACOM_PENINPUT)) {
+        
+        writeInputReportToBuffer(rdesc, return_size);
+        
+    } else if (rdesc[2]==WACOM_FINGERTOUCH && rdesc[4] >=0x02) {
+        // set click state for each finger to null so OSX doesn't go crazy
+        rdesc[5]=0x0;
+        rdesc[12]=0x0;
+        rdesc[19]=0x0;
+        rdesc[26]=0x0;
+        rdesc[33]=0x0;
+        
+        uint8_t report[42];
+        
+        for (int i=0;i < 42; i++)
+            report [i] = rdesc[i];
+        
+        touchscreenRawInput(&softc, report, 1);
+        
+    }
     
     IOFree(rdesc, rsize);
     
     hid_device->timerSource->setTimeoutMS(5);
 }
-
 
 
 
@@ -484,10 +499,69 @@ void VoodooWacomDevice::writeInputReportToBuffer(unsigned char* rdesc, int retur
     IOReturn err = _wacwrapper->handleReport(buffer, kIOHIDReportTypeInput);
     if (err != kIOReturnSuccess)
         IOLog("Error handling report: 0x%.8x\n", err);
-
+    
     buffer->release();
     
 }
+
+void VoodooWacomDevice::touchscreenRawInput(struct csgesture_softc *sc, uint8_t *report, int tickinc){
+    
+    uint8_t *finger_data = &report[WACOM_FINGER_DATA_OFFSET];
+    int i;
+    //    uint8_t tp_info = report[WACOM_TOUCH_INFO_OFFSET];
+    //    uint8_t hover_info = report[WACOM_HOVER_INFO_OFFSET];
+    bool contact_valid, hover_event;
+    unsigned int scaled_pressure;
+    
+    int nfingers = 0;
+    
+    for (int i=0;i < WACOM_MAX_FINGERS; i++) {
+        
+        sc->x[i] = -1;
+        sc->y[i] = -1;
+        sc->p[i] = -1;
+    }
+    
+    
+    for (i=0; i < WACOM_MAX_FINGERS; i++) {
+        
+        
+        
+        contact_valid = finger_data[0];
+        unsigned int pos_x, pos_y;
+        unsigned int pressure = 255;
+        
+        if (contact_valid) {
+            pos_x = (finger_data[2] | finger_data[3] << 8);
+            pos_y = (finger_data[4] | finger_data[5] << 8);
+            
+            scaled_pressure = pressure;
+            
+            
+            sc->x[i] = pos_x;
+            sc->y[i] = pos_y;
+            sc->p[i] = scaled_pressure;
+            
+        }
+        
+        else {
+            
+        }
+        
+        
+        if (contact_valid) {
+            finger_data += WACOM_FINGER_DATA_LEN;
+            nfingers++;
+        }
+    }
+    sc->buttondown = 0x0;
+    
+    _wrapper->ProcessGesture(sc);
+    
+    
+}
+
+
 
 
 

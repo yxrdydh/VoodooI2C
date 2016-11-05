@@ -30,10 +30,18 @@
 #define I2C_HID_PWR_SLEEP 0x01
 
 #define WACOM_PEN_DOWN 0x21
-#define WACOM_FINGERTOUCH 0x2a
+#define WACOM_FINGERTOUCH 0x0c
+#define WACOM_PENINPUT 0x06
 #define WACOM_SINGLETOUCH 0x01
 #define WACOM_TWOTOUCH 0x02
 #define WACOM_THREETOUCH 0x03
+
+#define WACOM_FINGER_DATA_OFFSET 6
+// #define WACOM_TOUCH_INFO_OFFSET 6
+#define WACOM_HOVER_INFO_OFFSET 5
+#define WACOM_MAX_FINGERS 5
+#define WACOM_FINGER_DATA_LEN 7
+
 
 
 class VoodooI2C;
@@ -214,6 +222,8 @@ public:
     bool i2c_hid_hwreset(i2c_hid *ihid);
     
     void writeInputReportToBuffer(unsigned char* rdesc, int return_size);
+    
+    void touchscreenRawInput(struct csgesture_softc *sc, uint8_t report[42], int tickinc);
     
     UInt16 compareInputx;
     UInt16 compareInputy;
