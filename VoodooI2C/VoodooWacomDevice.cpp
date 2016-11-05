@@ -463,27 +463,55 @@ void VoodooWacomDevice::i2c_hid_get_input(OSObject* owner, IOTimerEventSource* s
         IOLog("%s: Incomplete report %d/%d\n", __func__, rsize, return_size);
     }
     
-    if ((rdesc[2]==WACOM_FINGERTOUCH && rdesc[4]==WACOM_SINGLETOUCH) or (rdesc[2]==WACOM_PENINPUT)) {
-        
-        writeInputReportToBuffer(rdesc, return_size);
-        
-    } else if (rdesc[2]==WACOM_FINGERTOUCH && rdesc[4] >=0x02) {
-        // set click state for each finger to null so OSX doesn't go crazy
+    if (rdesc[4]>=WACOM_TWOTOUCH && rdesc[2]==WACOM_FINGERTOUCH){
+
         rdesc[5]=0x0;
         rdesc[12]=0x0;
         rdesc[19]=0x0;
         rdesc[26]=0x0;
         rdesc[33]=0x0;
         
+        if (exitsingletouch) {
+            writeInputReportToBuffer(rdesc, return_size);
+        }
+        
+        
         uint8_t report[42];
         
         for (int i=0;i < 42; i++)
             report [i] = rdesc[i];
         
+        
         touchscreenRawInput(&softc, report, 1);
         
+        exitsingletouch=false;
+        exitmultitouch=true;
+        
+        
+    } else if ((rdesc[4]==WACOM_SINGLETOUCH && rdesc[2]==WACOM_FINGERTOUCH) or (rdesc[2]==WACOM_PENINPUT)) {
+        
+        if (!exitmultitouch) {
+        
+        writeInputReportToBuffer(rdesc, return_size);
+        exitsingletouch=true;
+        exitmultitouch=false;
+        
+        } else {
+            
+            rdesc[5]=0x0;
+            rdesc[12]=0x0;
+            rdesc[19]=0x0;
+            rdesc[26]=0x0;
+            rdesc[33]=0x0;
+            writeInputReportToBuffer(rdesc, return_size);
+            exitmultitouch=false;
+            exitsingletouch=true;
+            
+        }
+    
     }
     
+   
     IOFree(rdesc, rsize);
     
     hid_device->timerSource->setTimeoutMS(5);
@@ -492,6 +520,13 @@ void VoodooWacomDevice::i2c_hid_get_input(OSObject* owner, IOTimerEventSource* s
 
 
 void VoodooWacomDevice::writeInputReportToBuffer(unsigned char* rdesc, int return_size){
+    
+  //  int rsize = WACOM_MAX_INPUT_LEN;
+  //  IOLog("===Input (%d)===\n", rsize);
+  //  for (int i = 0; i < rsize; i++)
+  //      IOLog("0x%02x ", (UInt8) rdesc[i]);
+  //  IOLog("\n");
+
     
     IOBufferMemoryDescriptor *buffer = IOBufferMemoryDescriptor::inTaskWithOptions(kernel_task, 0, return_size);
     buffer->writeBytes(0, rdesc + 2, return_size - 2);

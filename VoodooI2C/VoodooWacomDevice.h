@@ -41,6 +41,7 @@
 #define WACOM_HOVER_INFO_OFFSET 5
 #define WACOM_MAX_FINGERS 5
 #define WACOM_FINGER_DATA_LEN 7
+#define WACOM_MAX_INPUT_LEN 42
 
 
 
@@ -228,7 +229,8 @@ public:
     UInt16 compareInputx;
     UInt16 compareInputy;
     int compareReportCounter = 0;
-    
+    bool exitsingletouch = false;
+    bool exitmultitouch = false;
 };
 
 #endif /* VoodooWacomDevice_h */
