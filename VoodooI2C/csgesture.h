@@ -29,6 +29,7 @@ private:
     int distancesq(int delta_x, int delta_y);
     
     //os callbacks
+    
     void update_keyboard(uint8_t shiftKeys, uint8_t *keyCodes);
 public:
     csgesture_softc *softc;
@@ -42,10 +43,8 @@ public:
     void ClearTapDrag(csgesture_softc *sc, int i);
     void ProcessGesture(csgesture_softc *sc);
     
-    
     void update_relative_mouse(char button,
                                char x, char y, char wheelPosition, char wheelHPosition);
-
     
     //os specific functions
     void prepareToSleep();

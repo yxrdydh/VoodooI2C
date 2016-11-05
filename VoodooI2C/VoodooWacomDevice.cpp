@@ -436,7 +436,6 @@ void VoodooWacomDevice::i2c_hid_get_input(OSObject* owner, IOTimerEventSource* s
                 compareInputx = 0;
                 compareInputy = 0;
                 compareReportCounter = 0;
-                
             }
         }
         else {
@@ -464,19 +463,35 @@ void VoodooWacomDevice::i2c_hid_get_input(OSObject* owner, IOTimerEventSource* s
         IOLog("%s: Incomplete report %d/%d\n", __func__, rsize, return_size);
     }
     
+    
+    
+    
+    writeInputReportToBuffer(rdesc, return_size);
+    
+    IOFree(rdesc, rsize);
+    
+    hid_device->timerSource->setTimeoutMS(5);
+}
+
+
+
+
+void VoodooWacomDevice::writeInputReportToBuffer(unsigned char* rdesc, int return_size){
+    
     IOBufferMemoryDescriptor *buffer = IOBufferMemoryDescriptor::inTaskWithOptions(kernel_task, 0, return_size);
     buffer->writeBytes(0, rdesc + 2, return_size - 2);
     
     IOReturn err = _wacwrapper->handleReport(buffer, kIOHIDReportTypeInput);
     if (err != kIOReturnSuccess)
         IOLog("Error handling report: 0x%.8x\n", err);
-    
+
     buffer->release();
     
-    IOFree(rdesc, rsize);
-    
-    hid_device->timerSource->setTimeoutMS(5);
 }
+
+
+
+
 
 bool VoodooWacomDevice::i2c_hid_get_report_descriptor(i2c_hid *ihid){
     UInt rsize;

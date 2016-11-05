@@ -213,6 +213,8 @@ public:
     
     bool i2c_hid_hwreset(i2c_hid *ihid);
     
+    void writeInputReportToBuffer(unsigned char* rdesc, int return_size);
+    
     UInt16 compareInputx;
     UInt16 compareInputy;
     int compareReportCounter = 0;
