@@ -35,6 +35,7 @@
 #define WACOM_SINGLETOUCH 0x01
 #define WACOM_TWOTOUCH 0x02
 #define WACOM_THREETOUCH 0x03
+#define WACOM_FOURTOUCH 0x04
 
 #define WACOM_FINGER_DATA_OFFSET 6
 // #define WACOM_TOUCH_INFO_OFFSET 6
@@ -43,7 +44,7 @@
 #define WACOM_FINGER_DATA_LEN 7
 #define WACOM_MAX_INPUT_LEN 42
 
-
+#define KBD_LCONTROL_BIT 1
 
 class VoodooI2C;
 class VoodooWacomWrapper;

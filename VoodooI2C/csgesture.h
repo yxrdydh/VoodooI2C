@@ -29,9 +29,9 @@ private:
     int distancesq(int delta_x, int delta_y);
     
     //os callbacks
-    
-    void update_keyboard(uint8_t shiftKeys, uint8_t *keyCodes);
 public:
+
+    void update_keyboard(uint8_t shiftKeys, uint8_t *keyCodes);
     csgesture_softc *softc;
     
     //public csgesture functions

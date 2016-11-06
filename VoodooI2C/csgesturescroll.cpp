@@ -133,7 +133,7 @@ void CSGestureScroll::scrollTimer(){
         softc->scrollInertiaActive = true;
     }
     
-    _scrollTimer->setTimeoutMS(10);
+    _scrollTimer->setTimeoutMS(5);
 }
 
 void CSGestureScroll::ProcessScroll(int x1, int y1, int x2, int y2) {
@@ -265,7 +265,7 @@ void CSGestureScroll::wakeFromSleep(){
     
     _scrollTimer = IOTimerEventSource::timerEventSource(this, OSMemberFunctionCast(IOTimerEventSource::Action, this, &CSGestureScroll::scrollTimer));
     _workLoop->addEventSource(_scrollTimer);
-    _scrollTimer->setTimeoutMS(10);
+    _scrollTimer->setTimeoutMS(5);
 }
 
 bool CSGestureScroll::start(IOService *provider){
@@ -282,7 +282,7 @@ bool CSGestureScroll::start(IOService *provider){
     
     _scrollTimer = IOTimerEventSource::timerEventSource(this, OSMemberFunctionCast(IOTimerEventSource::Action, this, &CSGestureScroll::scrollTimer));
     _workLoop->addEventSource(_scrollTimer);
-    _scrollTimer->setTimeoutMS(10);
+    _scrollTimer->setTimeoutMS(5);
     if (_scrollTimer)
         return true;
     return false;

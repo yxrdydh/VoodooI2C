@@ -424,6 +424,20 @@ void VoodooWacomDevice::i2c_hid_get_input(OSObject* owner, IOTimerEventSource* s
     UInt16 rtempx = rdesc[9] | rdesc[8] << 8;
     UInt16 rtempy = rdesc[11] | rdesc[10] << 8;
     
+    if (rdesc[2] == WACOM_FINGERTOUCH && rdesc[4] == WACOM_FOURTOUCH){
+
+        uint8_t KeyCode[6] = {0x44, 0, 0, 0, 0, 0};
+        uint8_t KeyMod = KBD_LCONTROL_BIT;
+        
+        _wrapper->update_keyboard(KeyMod, KeyCode);
+        
+        KeyMod = 0;
+        KeyCode[0] = 0x0;
+        _wrapper->update_keyboard(KeyMod, KeyCode);
+        
+        
+    }
+    
     if (rdesc[2] == WACOM_FINGERTOUCH && rdesc[4] == WACOM_SINGLETOUCH) {
         if (rtempx == compareInputx && rtempy == compareInputy) {
             compareReportCounter = compareReportCounter + 1;
@@ -463,7 +477,7 @@ void VoodooWacomDevice::i2c_hid_get_input(OSObject* owner, IOTimerEventSource* s
         IOLog("%s: Incomplete report %d/%d\n", __func__, rsize, return_size);
     }
     
-    if (rdesc[4]>=WACOM_TWOTOUCH && rdesc[2]==WACOM_FINGERTOUCH){
+    if (rdesc[2]==WACOM_FINGERTOUCH && rdesc[4]>=WACOM_TWOTOUCH){
 
         rdesc[5]=0x0;
         rdesc[12]=0x0;
@@ -486,9 +500,9 @@ void VoodooWacomDevice::i2c_hid_get_input(OSObject* owner, IOTimerEventSource* s
         
         exitsingletouch=false;
         exitmultitouch=true;
+
         
-        
-    } else if ((rdesc[4]==WACOM_SINGLETOUCH && rdesc[2]==WACOM_FINGERTOUCH) or (rdesc[2]==WACOM_PENINPUT)) {
+    } else if ((rdesc[2]==WACOM_FINGERTOUCH && rdesc[4]==WACOM_SINGLETOUCH) or (rdesc[2]==WACOM_PENINPUT)) {
         
         if (!exitmultitouch) {
         

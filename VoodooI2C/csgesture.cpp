@@ -285,7 +285,7 @@ bool CSGesture::ProcessScroll(csgesture_softc *sc, int abovethreshold, int iToUs
 }
 
 bool CSGesture::ProcessThreeFingerSwipe(csgesture_softc *sc, int abovethreshold, int iToUse[3]) {
-    if (abovethreshold == 3 || abovethreshold == 4) {
+    if (abovethreshold == 3) {
         _scrollHandler->softc = sc;
         _scrollHandler->stopScroll();
         
@@ -477,8 +477,8 @@ void CSGesture::ProcessGesture(csgesture_softc *sc) {
         handled = ProcessThreeFingerSwipe(sc, abovethreshold, iToUse);
     if (!handled)
         handledByScroll = handled = ProcessScroll(sc, abovethreshold, iToUse);
-    if (!handled)
-        handled = ProcessMove(sc, abovethreshold, iToUse);
+//    if (!handled)
+//        handled = ProcessMove(sc, abovethreshold, iToUse);
     
 #pragma mark process clickpad press state
     int buttonmask = 0;
