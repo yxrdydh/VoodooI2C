@@ -494,7 +494,7 @@ void VoodooWacomDevice::i2c_hid_get_input(OSObject* owner, IOTimerEventSource* s
         
         for (int i=0;i < 42; i++)
             report [i] = rdesc[i];
-        
+        _wrapper->update_relative_mouse(0x0, 0, 0, 0, 0);
         
         touchscreenRawInput(&softc, report, 1);
         
@@ -520,6 +520,8 @@ void VoodooWacomDevice::i2c_hid_get_input(OSObject* owner, IOTimerEventSource* s
             writeInputReportToBuffer(rdesc, return_size);
             exitmultitouch=false;
             exitsingletouch=true;
+            _wrapper->update_relative_mouse(0x0, 0, 0, 0, 0);
+
             
         }
     
