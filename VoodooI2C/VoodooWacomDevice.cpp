@@ -490,7 +490,6 @@ void VoodooWacomDevice::i2c_hid_get_input(OSObject* owner, IOTimerEventSource* s
         }
         
         
-        uint8_t report[42];
         
         for (int i=0;i < 42; i++)
             report [i] = rdesc[i];

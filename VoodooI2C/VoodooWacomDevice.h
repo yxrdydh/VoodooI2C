@@ -190,6 +190,8 @@ public:
     
     struct i2c_hid_cmd hid_set_power_cmd = { I2C_HID_CMD(0x08) };
     
+    uint8_t report[WACOM_MAX_INPUT_LEN];
+    
     
     int initHIDDevice(I2CDevice *hid_device);
     
