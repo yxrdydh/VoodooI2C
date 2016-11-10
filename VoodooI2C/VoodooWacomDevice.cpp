@@ -424,20 +424,6 @@ void VoodooWacomDevice::i2c_hid_get_input(OSObject* owner, IOTimerEventSource* s
     UInt16 rtempx = rdesc[9] | rdesc[8] << 8;
     UInt16 rtempy = rdesc[11] | rdesc[10] << 8;
     
-    if (rdesc[2] == WACOM_FINGERTOUCH && rdesc[4] == WACOM_FOURTOUCH){
-
-        uint8_t KeyCode[6] = {0x44, 0, 0, 0, 0, 0};
-        uint8_t KeyMod = KBD_LCONTROL_BIT;
-        
-        _wrapper->update_keyboard(KeyMod, KeyCode);
-        
-        KeyMod = 0;
-        KeyCode[0] = 0x0;
-        _wrapper->update_keyboard(KeyMod, KeyCode);
-        
-        
-    }
-    
     if (rdesc[2] == WACOM_FINGERTOUCH && rdesc[4] == WACOM_SINGLETOUCH) {
         if (rtempx == compareInputx && rtempy == compareInputy) {
             compareReportCounter = compareReportCounter + 1;

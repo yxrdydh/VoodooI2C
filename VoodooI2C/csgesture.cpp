@@ -344,6 +344,88 @@ bool CSGesture::ProcessThreeFingerSwipe(csgesture_softc *sc, int abovethreshold,
     }
 }
 
+bool CSGesture::ProcessFourFingerSwipe(csgesture_softc *sc, int abovethreshold, int iToUse[3]) {
+    if (abovethreshold == 4) {
+        _scrollHandler->softc = sc;
+        _scrollHandler->stopScroll();
+        
+        int i1 = iToUse[0];
+        int delta_x1 = sc->x[i1] - sc->lastx[i1];
+        int delta_y1 = sc->y[i1] - sc->lasty[i1];
+        
+        int i2 = iToUse[1];
+        int delta_x2 = sc->x[i2] - sc->lastx[i2];
+        int delta_y2 = sc->y[i2] - sc->lasty[i2];
+        
+        int i3 = iToUse[2];
+        int delta_x3 = sc->x[i3] - sc->lastx[i3];
+        int delta_y3 = sc->y[i3] - sc->lasty[i3];
+        
+        int avgx = (delta_x1 + delta_x2 + delta_x3) / 3;
+        int avgy = (delta_y1 + delta_y2 + delta_y3) / 3;
+        
+        sc->multitaskingx += avgx;
+        sc->multitaskingy += avgy;
+        sc->multitaskinggesturetick++;
+        
+        if (sc->multitaskinggesturetick > 5 && !sc->multitaskingdone) {
+            if ((abs(delta_y1) + abs(delta_y2) + abs(delta_y3)) > (abs(delta_x1) + abs(delta_x2) + abs(delta_x3))) {
+                if (abs(sc->multitaskingy) > 50) {
+                    uint8_t shiftKeys = KBD_LCONTROL_BIT;
+                    uint8_t keyCodes[KBD_KEY_CODES] = { 0, 0, 0, 0, 0, 0 };
+                    if (sc->multitaskingy < 0){
+                        shiftKeys = KBD_LCONTROL_BIT;
+                        keyCodes[0] = 0x44;
+                    }else{
+                        shiftKeys = KBD_LGUI_BIT;
+                        keyCodes[0] = 0x1A;}
+                    update_keyboard(shiftKeys, keyCodes);
+                    shiftKeys = 0;
+                    keyCodes[0] = 0x0;
+                    update_keyboard(shiftKeys, keyCodes);
+                    sc->multitaskingx = 0;
+                    sc->multitaskingy = 0;
+                    sc->multitaskingdone = true;
+                }
+            }
+            else {
+                if (abs(sc->multitaskingx) > 50) {
+                    uint8_t shiftKeys = KBD_LCONTROL_BIT;
+                    uint8_t keyCodes[KBD_KEY_CODES] = { 0, 0, 0, 0, 0, 0 };
+                    if (sc->multitaskingx > 0){
+                        shiftKeys = KBD_LCONTROL_BIT;
+                        keyCodes[0] = 0x43;
+                    } else {
+                        shiftKeys = KBD_LGUI_BIT;
+                        keyCodes[0] = 0x14;}
+                    update_keyboard(shiftKeys, keyCodes);
+                    shiftKeys = 0;
+                    keyCodes[0] = 0x0;
+                    update_keyboard(shiftKeys, keyCodes);
+                    sc->multitaskingx = 0;
+                    sc->multitaskingy = 0;
+                    sc->multitaskingdone = true;
+                }
+            }
+        }
+        else if (sc->multitaskinggesturetick > 25) {
+            sc->multitaskingx = 0;
+            sc->multitaskingy = 0;
+            sc->multitaskinggesturetick = 0;
+            sc->multitaskingdone = false;
+        }
+        return true;
+    }
+    else {
+        sc->multitaskingx = 0;
+        sc->multitaskingy = 0;
+        sc->multitaskinggesturetick = 0;
+        sc->multitaskingdone = false;
+        return false;
+    }
+}
+
+
 void CSGesture::TapToClickOrDrag(csgesture_softc *sc, int button) {
     if (!sc->settings.tapToClickEnabled)
         return;
@@ -455,7 +537,8 @@ void CSGesture::ProcessGesture(csgesture_softc *sc) {
 #pragma mark process different gestures
     bool handled = false;
     bool handledByScroll = false;
-    
+    if (!handled && abovethreshold==4)
+        handled = ProcessFourFingerSwipe(sc, abovethreshold, iToUse);
     if (!handled)
         handled = ProcessThreeFingerSwipe(sc, abovethreshold, iToUse);
     if (!handled)
