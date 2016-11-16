@@ -82,7 +82,6 @@ void CSGestureScroll::stopScroll(){
     dy_history.reset();
     isTouchActive = false;
     
-    disableScrollingDelayLaunch();
 }
 
 void CSGestureScroll::scrollTimer(){
@@ -126,8 +125,9 @@ void CSGestureScroll::scrollTimer(){
         }
     }
     
-    if (momentumscrollcurrentx == 0 && momentumscrollcurrenty == 0)
-        disableScrollingDelayLaunch();
+    if (momentumscrollcurrentx == 0 && momentumscrollcurrenty == 0){
+        
+    }
     else {
         cancelDelayScroll = true;
         softc->scrollInertiaActive = true;
@@ -272,7 +272,7 @@ bool CSGestureScroll::start(IOService *provider){
     if (!super::start(provider))
         return false;
     
-    _workLoop = getWorkLoop();
+/*    _workLoop = getWorkLoop();
     if (!_workLoop){
         IOLog("CSGestureScroll: Failed to get workloop!\n");
         return false;
@@ -284,7 +284,7 @@ bool CSGestureScroll::start(IOService *provider){
     _workLoop->addEventSource(_scrollTimer);
     _scrollTimer->setTimeoutMS(5);
     if (_scrollTimer)
-        return true;
+        return true;*/
     return false;
 }
 

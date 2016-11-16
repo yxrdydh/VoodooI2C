@@ -472,7 +472,14 @@ void VoodooWacomDevice::i2c_hid_get_input(OSObject* owner, IOTimerEventSource* s
         rdesc[33]=0x0;
         
         if (exitsingletouch) {
-            writeInputReportToBuffer(rdesc, return_size);
+            IOBufferMemoryDescriptor *buffer = IOBufferMemoryDescriptor::inTaskWithOptions(kernel_task, 0, return_size);
+            buffer->writeBytes(0, rdesc + 2, return_size - 2);
+            
+            IOReturn err = _wacwrapper->handleReport(buffer, kIOHIDReportTypeInput);
+            if (err != kIOReturnSuccess)
+                IOLog("Error handling report: 0x%.8x\n", err);
+            
+            buffer->release();
         }
         
         
@@ -491,7 +498,14 @@ void VoodooWacomDevice::i2c_hid_get_input(OSObject* owner, IOTimerEventSource* s
         
         if (!exitmultitouch) {
         
-        writeInputReportToBuffer(rdesc, return_size);
+            IOBufferMemoryDescriptor *buffer = IOBufferMemoryDescriptor::inTaskWithOptions(kernel_task, 0, return_size);
+            buffer->writeBytes(0, rdesc + 2, return_size - 2);
+            
+            IOReturn err = _wacwrapper->handleReport(buffer, kIOHIDReportTypeInput);
+            if (err != kIOReturnSuccess)
+                IOLog("Error handling report: 0x%.8x\n", err);
+            
+            buffer->release();
         exitsingletouch=true;
         exitmultitouch=false;
         
@@ -502,7 +516,14 @@ void VoodooWacomDevice::i2c_hid_get_input(OSObject* owner, IOTimerEventSource* s
             rdesc[19]=0x0;
             rdesc[26]=0x0;
             rdesc[33]=0x0;
-            writeInputReportToBuffer(rdesc, return_size);
+            IOBufferMemoryDescriptor *buffer = IOBufferMemoryDescriptor::inTaskWithOptions(kernel_task, 0, return_size);
+            buffer->writeBytes(0, rdesc + 2, return_size - 2);
+            
+            IOReturn err = _wacwrapper->handleReport(buffer, kIOHIDReportTypeInput);
+            if (err != kIOReturnSuccess)
+                IOLog("Error handling report: 0x%.8x\n", err);
+            
+            buffer->release();
             exitmultitouch=false;
             exitsingletouch=true;
             _wrapper->update_relative_mouse(0x0, 0, 0, 0, 0);
@@ -520,7 +541,7 @@ void VoodooWacomDevice::i2c_hid_get_input(OSObject* owner, IOTimerEventSource* s
 
 
 
-void VoodooWacomDevice::writeInputReportToBuffer(unsigned char* rdesc, int return_size){
+/*void VoodooWacomDevice::writeInputReportToBuffer(unsigned char* rdesc, int return_size){
     
   //  int rsize = WACOM_MAX_INPUT_LEN;
   //  IOLog("===Input (%d)===\n", rsize);
@@ -538,7 +559,7 @@ void VoodooWacomDevice::writeInputReportToBuffer(unsigned char* rdesc, int retur
     
     buffer->release();
     
-}
+}*/
 
 void VoodooWacomDevice::touchscreenRawInput(struct csgesture_softc *sc, uint8_t *report, int tickinc){
     
