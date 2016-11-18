@@ -225,7 +225,7 @@ public:
     
     bool i2c_hid_hwreset(i2c_hid *ihid);
     
-//    void writeInputReportToBuffer(unsigned char* rdesc, int return_size);
+    void writeInputReportToBuffer(unsigned char* rdesc, int return_size);
     
     void touchscreenRawInput(struct csgesture_softc *sc, uint8_t report[42], int tickinc);
     
