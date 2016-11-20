@@ -416,11 +416,11 @@ void VoodooWacomDevice::i2c_hid_get_input(OSObject* owner, IOTimerEventSource* s
     
     ret = i2c_hid_command(ihid, &hid_input_cmd, rdesc, rsize);
     
-    IOLog("===Input (%d)===\n", rsize);
+/*    IOLog("===Input (%d)===\n", rsize);
     for (int i = 0; i < rsize; i++)
         IOLog("0x%02x ", (UInt8) rdesc[i]);
     IOLog("\n");
-    
+*/    
     UInt16 rtempx = rdesc[9] | rdesc[8] << 8;
     UInt16 rtempy = rdesc[11] | rdesc[10] << 8;
     
