@@ -199,9 +199,10 @@ err:
 
 void VoodooWacomDevice::initialize_wrapper(void) {
     _wrapper = new CSGesture;
-    _wrapper->vendorID = 'nalE';
-    _wrapper->productID = 'dptE';
+    _wrapper->vendorID = 'mocW';
+    _wrapper->productID = 'lnpT';
     _wrapper->softc = &softc;
+    _wrapper->softc->disableIntertialScroll = true;
     _wrapper->initialize_wrapper(this);
 
     
@@ -420,7 +421,13 @@ void VoodooWacomDevice::i2c_hid_get_input(OSObject* owner, IOTimerEventSource* s
     for (int i = 0; i < rsize; i++)
         IOLog("0x%02x ", (UInt8) rdesc[i]);
     IOLog("\n");
-*/    
+*/
+    
+    
+//  This is a routine to accomplish a right click by comparing positional data from report to report.
+//  The length of time to initiate a right click can be adjusted by altering the compareReportCounter check.
+//  TO DO - build in some tolerance for slight movement.
+    
     UInt16 rtempx = rdesc[9] | rdesc[8] << 8;
     UInt16 rtempy = rdesc[11] | rdesc[10] << 8;
     
@@ -446,6 +453,9 @@ void VoodooWacomDevice::i2c_hid_get_input(OSObject* owner, IOTimerEventSource* s
         
     }
     
+//  Mac OS X seems to have an issue with the Wacom's 2048 levels of pressure sensitivity.
+//  The below function scales the pressure to 1024 when the pen is being used.
+    
     if (rdesc[3] == WACOM_PEN_DOWN) {
         rdesc[8] = rdesc[8] * .5;
         rdesc[9] = rdesc[9] * .5;
@@ -463,6 +473,10 @@ void VoodooWacomDevice::i2c_hid_get_input(OSObject* owner, IOTimerEventSource* s
         IOLog("%s: Incomplete report %d/%d\n", __func__, rsize, return_size);
     }
     
+// This routine accomplishes two things.  A state based decision tree which either sends the input report to the buffer
+//  when the pen or singletouch is being used, or it sends the multitouch data to touchscreenRawInput for processing before being
+// sent to CSGesture.  Additionally, it attempts to correct problems that occur during the transition between multi and singletouch.
+    
     if (rdesc[2]==WACOM_FINGERTOUCH && rdesc[4]>=WACOM_TWOTOUCH){
 
         rdesc[5]=0x0;
@@ -477,7 +491,7 @@ void VoodooWacomDevice::i2c_hid_get_input(OSObject* owner, IOTimerEventSource* s
         
         
         
-        for (int i=0;i < 42; i++)
+        for (int i=0;i < WACOM_MAX_INPUT_LEN; i++)
             report [i] = rdesc[i];
         _wrapper->update_relative_mouse(0x0, 0, 0, 0, 0);
         
@@ -542,11 +556,13 @@ void VoodooWacomDevice::writeInputReportToBuffer(unsigned char* rdesc, int retur
 
 void VoodooWacomDevice::touchscreenRawInput(struct csgesture_softc *sc, uint8_t *report, int tickinc){
     
+    // This function assembles the multitouch data and passes it to csgesture for gesture processing.
+    // The Wacom detects up to ten fingers, but the limit is currently set to five and only up to four
+    // fingers are currently processed for gestures.
+    
     uint8_t *finger_data = &report[WACOM_FINGER_DATA_OFFSET];
     int i;
-    //    uint8_t tp_info = report[WACOM_TOUCH_INFO_OFFSET];
-    //    uint8_t hover_info = report[WACOM_HOVER_INFO_OFFSET];
-    bool contact_valid, hover_event;
+    bool contact_valid;
     unsigned int scaled_pressure;
     
     int nfingers = 0;
@@ -596,10 +612,6 @@ void VoodooWacomDevice::touchscreenRawInput(struct csgesture_softc *sc, uint8_t 
     
     
 }
-
-
-
-
 
 
 

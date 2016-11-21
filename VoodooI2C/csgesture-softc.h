@@ -26,6 +26,7 @@ struct csgesture_softc {
     
     char product_id[16];
     char firmware_version[4];
+    bool disableIntertialScroll;
     
     int resx;
     int resy;
