@@ -9,6 +9,8 @@
 #include <IOKit/IOLib.h>
 #include <IOKit/hidsystem/IOHIDParameter.h>
 #include "VoodooCSGestureHIPointingWrapper.h"
+#include <libkern/version.h>
+
 
 OSDefineMetaClassAndStructors(VoodooCSGestureHIPointingWrapper, IOHIPointing);
 
@@ -41,6 +43,21 @@ bool VoodooCSGestureHIPointingWrapper::start(IOService *provider){
     if (!super::start(provider))
         return false;
     
+    if (version_major>=16) {
+        
+        setProperty("SupportsGestureScrolling", true);
+        setProperty("TrackpadFourFingerGestures", false);
+        setProperty("ApplePreferenceIdentifier", "com.apple.AppleMultitouchTrackpad");
+        setProperty("MTHIDDevice", true);
+        setProperty("MT Built-in", true);
+        setProperty("ApplePreferenceCapability", true);
+        setProperty("TrackpadEmbedded", true);
+        setProperty("TrackpadThreeFingerDrag", false);
+
+    } else {
+    
+    
+    
     int enabledProperty = 1;
     setProperty("Clicking", enabledProperty,
                 sizeof(enabledProperty) * 8);
@@ -48,6 +65,8 @@ bool VoodooCSGestureHIPointingWrapper::start(IOService *provider){
                 sizeof(enabledProperty) * 8);
     setProperty("TrackpadHorizScroll", enabledProperty,
                 sizeof(enabledProperty) * 8);
+        
+    }
     
     //
     // Must add this property to let our superclass know that it should handle
@@ -67,6 +86,9 @@ bool VoodooCSGestureHIPointingWrapper::start(IOService *provider){
     setProperty(kIOHIDPointerAccelerationTypeKey, kIOHIDTrackpadAccelerationType);
     setProperty(kIOHIDScrollAccelerationTypeKey, kIOHIDTrackpadScrollAccelerationKey);
     setProperty(kIOHIDScrollResolutionKey, 800 << 16, 32);
+
+    setProperty("HIDScrollResolutionX", 800 << 16, 32);
+    setProperty("HIDScrollResolutionY", 800 << 16, 32);
     
     return true;
 }
