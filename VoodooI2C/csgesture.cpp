@@ -95,7 +95,7 @@ int CSGesture::distancesq(int delta_x, int delta_y){
     return (delta_x * delta_x) + (delta_y*delta_y);
 }
 
-bool CSGesture::ProcessMove(csgesture_softc *sc, int abovethreshold, int iToUse[3]) {
+bool CSGesture::ProcessMove(csgesture_softc *sc, int abovethreshold, int iToUse[5]) {
     if (abovethreshold == 1 || sc->panningActive) {
         int i = iToUse[0];
         if (!sc->panningActive && sc->tick[i] < 5)
@@ -137,7 +137,7 @@ bool CSGesture::ProcessMove(csgesture_softc *sc, int abovethreshold, int iToUse[
     return false;
 }
 
-bool CSGesture::ProcessScroll(csgesture_softc *sc, int abovethreshold, int iToUse[3]) {
+bool CSGesture::ProcessScroll(csgesture_softc *sc, int abovethreshold, int iToUse[5]) {
     sc->scrollx = 0;
     sc->scrolly = 0;
     if (abovethreshold == 2 || sc->scrollingActive) {
@@ -267,7 +267,7 @@ bool CSGesture::ProcessScroll(csgesture_softc *sc, int abovethreshold, int iToUs
     return false;
 }
 
-bool CSGesture::ProcessThreeFingerSwipe(csgesture_softc *sc, int abovethreshold, int iToUse[3]) {
+bool CSGesture::ProcessThreeFingerSwipe(csgesture_softc *sc, int abovethreshold, int iToUse[5]) {
     if (abovethreshold == 3) {
         _scrollHandler->softc = sc;
         _scrollHandler->stopScroll();
@@ -344,7 +344,7 @@ bool CSGesture::ProcessThreeFingerSwipe(csgesture_softc *sc, int abovethreshold,
     }
 }
 
-bool CSGesture::ProcessFourFingerSwipe(csgesture_softc *sc, int abovethreshold, int iToUse[3]) {
+bool CSGesture::ProcessFourFingerSwipe(csgesture_softc *sc, int abovethreshold, int iToUse[5]) {
     if (abovethreshold == 4) {
         _scrollHandler->softc = sc;
         _scrollHandler->stopScroll();
@@ -361,15 +361,19 @@ bool CSGesture::ProcessFourFingerSwipe(csgesture_softc *sc, int abovethreshold, 
         int delta_x3 = sc->x[i3] - sc->lastx[i3];
         int delta_y3 = sc->y[i3] - sc->lasty[i3];
         
-        int avgx = (delta_x1 + delta_x2 + delta_x3) / 3;
-        int avgy = (delta_y1 + delta_y2 + delta_y3) / 3;
+        int i4 = iToUse[3];
+        int delta_x4 = sc->x[i4] - sc->lastx[i4];
+        int delta_y4 = sc->y[i4] - sc->lasty[i4];
+        
+        int avgx = (delta_x1 + delta_x2 + delta_x3 + delta_x4) / 4;
+        int avgy = (delta_y1 + delta_y2 + delta_y3 + delta_y4) / 4;
         
         sc->multitaskingx += avgx;
         sc->multitaskingy += avgy;
         sc->multitaskinggesturetick++;
         
         if (sc->multitaskinggesturetick > 5 && !sc->multitaskingdone) {
-            if ((abs(delta_y1) + abs(delta_y2) + abs(delta_y3)) > (abs(delta_x1) + abs(delta_x2) + abs(delta_x3))) {
+            if ((abs(delta_y1) + abs(delta_y2) + abs(delta_y3) + abs(delta_y4)) > (abs(delta_x1) + abs(delta_x2) + abs(delta_x3) + abs(delta_x4))) {
                 if (abs(sc->multitaskingy) > 50) {
                     uint8_t shiftKeys = KBD_LCONTROL_BIT;
                     uint8_t keyCodes[KBD_KEY_CODES] = { 0, 0, 0, 0, 0, 0 };
@@ -425,7 +429,7 @@ bool CSGesture::ProcessFourFingerSwipe(csgesture_softc *sc, int abovethreshold, 
     }
 }
 
-bool CSGesture::ProcessFiveFingerSwipe(csgesture_softc *sc, int abovethreshold, int iToUse[3]) {
+bool CSGesture::ProcessFiveFingerSwipe(csgesture_softc *sc, int abovethreshold, int iToUse[5]) {
     if (abovethreshold == 5) {
         _scrollHandler->softc = sc;
         _scrollHandler->stopScroll();
@@ -442,15 +446,24 @@ bool CSGesture::ProcessFiveFingerSwipe(csgesture_softc *sc, int abovethreshold, 
         int delta_x3 = sc->x[i3] - sc->lastx[i3];
         int delta_y3 = sc->y[i3] - sc->lasty[i3];
         
-        int avgx = (delta_x1 + delta_x2 + delta_x3) / 3;
-        int avgy = (delta_y1 + delta_y2 + delta_y3) / 3;
+        int i4 = iToUse[3];
+        int delta_x4 = sc->x[i4] - sc->lastx[i4];
+        int delta_y4 = sc->y[i4] - sc->lasty[i4];
+
+        int i5 = iToUse[4];
+        int delta_x5 = sc->x[i5] - sc->lastx[i5];
+        int delta_y5 = sc->y[i5] - sc->lasty[i5];
+
+        
+        int avgx = (delta_x1 + delta_x2 + delta_x3 + delta_x4 + delta_x5) / 5;
+        int avgy = (delta_y1 + delta_y2 + delta_y3 + delta_y4 + delta_y5) / 5;
         
         sc->multitaskingx += avgx;
         sc->multitaskingy += avgy;
         sc->multitaskinggesturetick++;
         
         if (sc->multitaskinggesturetick > 5 && !sc->multitaskingdone) {
-            if ((abs(delta_y1) + abs(delta_y2) + abs(delta_y3)) > (abs(delta_x1) + abs(delta_x2) + abs(delta_x3))) {
+            if ((abs(delta_y1) + abs(delta_y2) + abs(delta_y3) + abs(delta_y4) + abs(delta_y5)) > (abs(delta_x1) + abs(delta_x2) + abs(delta_x3) +abs(delta_x4) + abs(delta_x5))) {
                 if (abs(sc->multitaskingy) > 50) {
                     uint8_t shiftKeys = KBD_LCONTROL_BIT;
                     uint8_t keyCodes[KBD_KEY_CODES] = { 0, 0, 0, 0, 0, 0 };
@@ -592,7 +605,7 @@ void CSGesture::ProcessGesture(csgesture_softc *sc) {
     
     int abovethreshold = 0;
     int recentlyadded = 0;
-    int iToUse[3] = { -1,-1,-1 };
+    int iToUse[5] = { -1,-1,-1,-1,-1 };
     int a = 0;
     
     int nfingers = 0;
