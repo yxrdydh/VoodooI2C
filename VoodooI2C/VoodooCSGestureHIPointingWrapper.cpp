@@ -54,7 +54,7 @@ bool VoodooCSGestureHIPointingWrapper::start(IOService *provider){
         setProperty("TrackpadEmbedded", true);
         setProperty("TrackpadThreeFingerDrag", false);
 
-    } else {
+    }
     
     
     
@@ -66,7 +66,7 @@ bool VoodooCSGestureHIPointingWrapper::start(IOService *provider){
     setProperty("TrackpadHorizScroll", enabledProperty,
                 sizeof(enabledProperty) * 8);
         
-    }
+    
     
     //
     // Must add this property to let our superclass know that it should handle

@@ -148,6 +148,7 @@
 			isa = PBXGroup;
 			children = (
 				F110CDB61D1F3B4D0057BBDB /* VoodooElanTouchpadDevice.cpp */,
+				F1FA896E1D7FAAF10019F9CF /* csgesturescroll.h */,
 				F110CDB71D1F3B4D0057BBDB /* VoodooElanTouchpadDevice.h */,
 			);
 			name = "Elan I2C Trackpad Driver";
@@ -183,7 +184,6 @@
 				F1FA89711D7FBD4F0019F9CF /* csgesture-softc.h */,
 				F191539B1D25CE14007972A7 /* csgesture.cpp */,
 				F1FA896D1D7FAAF10019F9CF /* csgesturescroll.cpp */,
-				F1FA896E1D7FAAF10019F9CF /* csgesturescroll.h */,
 				F1AB82CE1C1E8F5E003EFE34 /* VoodooCSGestureHIDWrapper.cpp */,
 				F1AB82CF1C1E8F5E003EFE34 /* VoodooCSGestureHIDWrapper.h */,
 				F198572F1D7F80AE00BAB4BB /* VoodooCSGestureHIPointingWrapper.cpp */,
