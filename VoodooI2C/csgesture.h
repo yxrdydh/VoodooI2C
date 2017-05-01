@@ -12,7 +12,7 @@
 #include "csgesture-softc.h"
 #include "csgesturescroll.h"
 
-#define MAX_FINGERS 15
+#define MAX_FINGERS 5
 
 class CSGesture {
 private:

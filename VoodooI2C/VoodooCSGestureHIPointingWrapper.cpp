@@ -29,7 +29,7 @@ IOItemCount VoodooCSGestureHIPointingWrapper::buttonCount(){
 };
 
 IOFixed VoodooCSGestureHIPointingWrapper::resolution(){
-    return (300) << 16;
+    return 4147850;
 };
 
 bool VoodooCSGestureHIPointingWrapper::init(){
@@ -46,7 +46,7 @@ bool VoodooCSGestureHIPointingWrapper::start(IOService *provider){
     if (version_major>=16) {
         
         setProperty("SupportsGestureScrolling", true);
-        setProperty("TrackpadFourFingerGestures", false);
+        setProperty("TrackpadFourFingerGestures", true);
         setProperty("ApplePreferenceIdentifier", "com.apple.AppleMultitouchTrackpad");
         setProperty("MTHIDDevice", true);
         setProperty("MT Built-in", true);

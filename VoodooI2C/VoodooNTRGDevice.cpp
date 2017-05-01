@@ -1,18 +1,18 @@
 //
-//  VoodooI2CDevice.cpp
+//  VoodooNTRGDevice.cpp
 //  VoodooI2C
 //
-//  Created by Alexandre on 02/02/2015.
-//  Copyright (c) 2015 Alexandre Daoud. All rights reserved.
+//  Created by Nate House on <some future date>
+//  Copyright © 2017 Alexandre Daoud. All rights reserved.
 //
 
-#include "VoodooI2CHIDDevice.h"
+#include "VoodooNTRGDevice.h"
 #include "VoodooI2C.h"
-#include "VoodooHIDWrapper.h"
+#include "VoodooNTRGWrapper.h"
 
-OSDefineMetaClassAndStructors(VoodooI2CHIDDevice, VoodooI2CDevice);
+OSDefineMetaClassAndStructors(VoodooNTRGDevice, VoodooI2CDevice);
 
-bool VoodooI2CHIDDevice::attach(IOService * provider, IOService* child)
+bool VoodooNTRGDevice::attach(IOService * provider, IOService* child)
 {
     if (!super::attach(provider))
         return false;
@@ -29,7 +29,7 @@ bool VoodooI2CHIDDevice::attach(IOService * provider, IOService* child)
     return true;
 }
 
-bool VoodooI2CHIDDevice::probe(IOService* device) {
+bool VoodooNTRGDevice::probe(IOService* device) {
     
     
     hid_device = (I2CDevice *)IOMalloc(sizeof(I2CDevice));
@@ -59,7 +59,7 @@ bool VoodooI2CHIDDevice::probe(IOService* device) {
     return 0;
 }
 
-void VoodooI2CHIDDevice::stop(IOService* device) {
+void VoodooNTRGDevice::stop(IOService* device) {
     
     IOLog("I2C HID Device is stopping\n");
     
@@ -92,7 +92,7 @@ void VoodooI2CHIDDevice::stop(IOService* device) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-void VoodooI2CHIDDevice::detach( IOService * provider )
+void VoodooNTRGDevice::detach( IOService * provider )
 {
     assert(_controller == provider);
     _controller->release();
@@ -101,7 +101,7 @@ void VoodooI2CHIDDevice::detach( IOService * provider )
     super::detach(provider);
 }
 
-int VoodooI2CHIDDevice::initHIDDevice(I2CDevice *hid_device) {
+int VoodooNTRGDevice::initHIDDevice(I2CDevice *hid_device) {
     int ret;
     UInt16 hidRegister;
     
@@ -156,7 +156,7 @@ int VoodooI2CHIDDevice::initHIDDevice(I2CDevice *hid_device) {
     hid_device->workLoop->retain();
     
     /*
-     hid_device->interruptSource = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &VoodooI2CHIDDevice::InterruptOccured), hid_device->provider);
+     hid_device->interruptSource = IOInterruptEventSource::interruptEventSource(this, OSMemberFunctionCast(IOInterruptEventAction, this, &VoodooNTRGDevice::InterruptOccured), hid_device->provider);
      
      if (hid_device->workLoop->addEventSource(hid_device->interruptSource) != kIOReturnSuccess) {
      IOLog("%s::%s::Could not add interrupt source to workloop\n", getName(), _controller->_dev->name);
@@ -167,7 +167,7 @@ int VoodooI2CHIDDevice::initHIDDevice(I2CDevice *hid_device) {
      hid_device->interruptSource->enable();
      */
     
-    hid_device->timerSource = IOTimerEventSource::timerEventSource(this, OSMemberFunctionCast(IOTimerEventSource::Action, this, &VoodooI2CHIDDevice::i2c_hid_get_input));
+    hid_device->timerSource = IOTimerEventSource::timerEventSource(this, OSMemberFunctionCast(IOTimerEventSource::Action, this, &VoodooNTRGDevice::i2c_hid_get_input));
     if (!hid_device->timerSource){
         goto err;
     }
@@ -197,32 +197,43 @@ err:
     return ret;
 }
 
-void VoodooI2CHIDDevice::initialize_wrapper(void) {
-    destroy_wrapper();
+void VoodooNTRGDevice::initialize_wrapper(void) {
+    _wrapper = new CSGesture;
+    _wrapper->vendorID = 'GRTN';
+    _wrapper->productID = '1000';
+    _wrapper->softc = &softc;
+    _wrapper->softc->infoSetup = true;
+    //_wrapper->softc->panningActive = 0;
+    _wrapper->softc->phyx = 2540;
+    _wrapper->softc->phyy = 1693;
+    _wrapper->softc->resx = 2560 * 10 / 9600;
+    _wrapper->softc->resy = 1693 * 10 / 7200;
+    _wrapper->softc->disableIntertialScroll = false;
+    _wrapper->softc->settings.tapToClickEnabled = true;
+    _wrapper->softc->settings.tapDragEnabled = true;
+    _wrapper->softc->settings.multiFingerTap = true;
     
-    IOLog("VoodooI2C: %s, line %d\n", __FILE__, __LINE__);
-    _wrapper = new VoodooHIDWrapper;
-    if (_wrapper->init()) {
-        IOLog("VoodooI2C: %s, line %d\n", __FILE__, __LINE__);
-        _wrapper->attach(this);
-        _wrapper->start(this);
+    _wrapper->initialize_wrapper(this);
+    
+    
+    _wacwrapper = new VoodooNTRGWrapper;
+    if (_wacwrapper->init()) {
+        _wacwrapper->attach(this);
+        _wacwrapper->start(this);
     }
     else {
-        IOLog("VoodooI2C: %s, line %d\n", __FILE__, __LINE__);
-        _wrapper->release();
-        _wrapper = NULL;
+        _wacwrapper->release();
+        _wacwrapper = NULL;
     }
 }
 
-void VoodooI2CHIDDevice::destroy_wrapper(void) {
-    if (_wrapper != NULL) {
-        _wrapper->terminate(kIOServiceRequired | kIOServiceSynchronous);
-        _wrapper->release();
-        _wrapper = NULL;
-    }
+void VoodooNTRGDevice::destroy_wrapper(void) {
+    _wrapper->destroy_wrapper();
+    _wacwrapper->release();
+    _wacwrapper = NULL;
 }
 
-int VoodooI2CHIDDevice::i2c_hid_acpi_pdata(i2c_hid *ihid) {
+int VoodooNTRGDevice::i2c_hid_acpi_pdata(i2c_hid *ihid) {
     
     UInt32 guid_1 = 0x3CDFF6F7;
     UInt32 guid_2 = 0x45554267;
@@ -258,7 +269,7 @@ int VoodooI2CHIDDevice::i2c_hid_acpi_pdata(i2c_hid *ihid) {
     return 0;
 }
 
-int VoodooI2CHIDDevice::i2c_get_slave_address(I2CDevice* hid_device){
+int VoodooNTRGDevice::i2c_get_slave_address(I2CDevice* hid_device){
     OSObject* result = NULL;
     
     hid_device->provider->evaluateObject("_CRS", &result);
@@ -273,7 +284,7 @@ int VoodooI2CHIDDevice::i2c_get_slave_address(I2CDevice* hid_device){
     
 }
 
-int VoodooI2CHIDDevice::i2c_hid_alloc_buffers(i2c_hid *ihid, UInt report_size) {
+int VoodooNTRGDevice::i2c_hid_alloc_buffers(i2c_hid *ihid, UInt report_size) {
     int args_len = sizeof(UInt8) + sizeof(UInt16) + sizeof(UInt16) + report_size;
     
     ihid->inbuf = (char *)IOMalloc(report_size);
@@ -290,7 +301,7 @@ int VoodooI2CHIDDevice::i2c_hid_alloc_buffers(i2c_hid *ihid, UInt report_size) {
     return 0;
 }
 
-void VoodooI2CHIDDevice::i2c_hid_free_buffers(i2c_hid *ihid, UInt report_size) {
+void VoodooNTRGDevice::i2c_hid_free_buffers(i2c_hid *ihid, UInt report_size) {
     IOFree(ihid->inbuf, report_size);
     IOFree(ihid->argsbuf, report_size);
     IOFree(ihid->cmdbuf, sizeof(UInt8) + sizeof(UInt16) + sizeof(UInt16) + report_size);
@@ -300,7 +311,7 @@ void VoodooI2CHIDDevice::i2c_hid_free_buffers(i2c_hid *ihid, UInt report_size) {
     ihid->bufsize = 0;
 }
 
-int VoodooI2CHIDDevice::i2c_hid_fetch_hid_descriptor(i2c_hid *ihid) {
+int VoodooNTRGDevice::i2c_hid_fetch_hid_descriptor(i2c_hid *ihid) {
     struct i2c_hid_desc *hdesc = &ihid->hdesc;
     UInt dsize;
     int ret;
@@ -328,11 +339,11 @@ int VoodooI2CHIDDevice::i2c_hid_fetch_hid_descriptor(i2c_hid *ihid) {
     return 0;
 }
 
-int VoodooI2CHIDDevice::i2c_hid_command(i2c_hid *ihid, struct i2c_hid_cmd *command, unsigned char *buf_recv, int data_len) {
+int VoodooNTRGDevice::i2c_hid_command(i2c_hid *ihid, struct i2c_hid_cmd *command, unsigned char *buf_recv, int data_len) {
     return __i2c_hid_command(ihid, command, 0, 0, NULL, 0, buf_recv, data_len);
 }
 
-int VoodooI2CHIDDevice::__i2c_hid_command(i2c_hid *ihid, struct i2c_hid_cmd *command, UInt8 reportID, UInt8 reportType, UInt8 *args, int args_len, unsigned char *buf_recv, int data_len) {
+int VoodooNTRGDevice::__i2c_hid_command(i2c_hid *ihid, struct i2c_hid_cmd *command, UInt8 reportID, UInt8 reportType, UInt8 *args, int args_len, unsigned char *buf_recv, int data_len) {
     union command *cmd = (union command *)ihid->cmdbuf;
     int ret;
     struct i2c_msg msg[2];
@@ -385,7 +396,7 @@ int VoodooI2CHIDDevice::__i2c_hid_command(i2c_hid *ihid, struct i2c_hid_cmd *com
     return ret;
 }
 
-int VoodooI2CHIDDevice::i2c_hid_set_power(i2c_hid *ihid, int power_state) {
+int VoodooNTRGDevice::i2c_hid_set_power(i2c_hid *ihid, int power_state) {
     int ret;
     
     ret = __i2c_hid_command(ihid, &hid_set_power_cmd, power_state, NULL, 0, NULL, 0, NULL);
@@ -396,7 +407,7 @@ int VoodooI2CHIDDevice::i2c_hid_set_power(i2c_hid *ihid, int power_state) {
 }
 
 
-void VoodooI2CHIDDevice::InterruptOccured(OSObject* owner, IOInterruptEventSource* src, int intCount){
+void VoodooNTRGDevice::InterruptOccured(OSObject* owner, IOInterruptEventSource* src, int intCount){
     IOLog("interrupt\n");
     if (hid_device->reading)
         return;
@@ -405,7 +416,7 @@ void VoodooI2CHIDDevice::InterruptOccured(OSObject* owner, IOInterruptEventSourc
     
 }
 
-void VoodooI2CHIDDevice::i2c_hid_get_input(OSObject* owner, IOTimerEventSource* sender) {
+void VoodooNTRGDevice::i2c_hid_get_input(OSObject* owner, IOTimerEventSource* sender) {
     //    IOLog("getting input\n");
     UInt rsize;
     int ret;
@@ -416,16 +427,26 @@ void VoodooI2CHIDDevice::i2c_hid_get_input(OSObject* owner, IOTimerEventSource* 
     
     ret = i2c_hid_command(ihid, &hid_input_cmd, rdesc, rsize);
     
-    /*IOLog("===Input (%d)===\n", rsize);
-    for (int i = 0; i < rsize; i++)
-        IOLog("0x%02x ", (UInt8) rdesc[i]);
-    IOLog("\n");*/
+    if ((rdesc[5] & NTRG_TIP_SWITCH) == NTRG_TIP_SWITCH)
+        tipSwitch = true;
+    if ((rdesc[5] & NTRG_IN_RANGE) == NTRG_IN_RANGE)
+        inRange = true;
+    if ((rdesc[5] & NTRG_CONFIDENCE) == NTRG_CONFIDENCE)
+        validTouch = true; //Always set hw issue???
+    int num_fingers = rdesc[24];
+    
+    
+    /*        IOLog("===Input (%d)===\n", rsize);
+     for (int i = 0; i < rsize; i++)
+     IOLog("0x%02x ", (UInt8) rdesc[i]);
+     IOLog("\n");
+    */
     
     int return_size = rdesc[0] | rdesc[1] << 8;
     if (return_size == 0) {
         /* host or device initiated RESET completed */
         // test/clear bit?
-        hid_device->timerSource->setTimeoutMS(10);
+        hid_device->timerSource->setTimeoutMS(5);
         return;
     }
     
@@ -433,21 +454,136 @@ void VoodooI2CHIDDevice::i2c_hid_get_input(OSObject* owner, IOTimerEventSource* 
         IOLog("%s: Incomplete report %d/%d\n", __func__, rsize, return_size);
     }
     
+    
+    //  This is a routine to accomplish a right click by comparing positional data from report to report.
+    //  The length of time to initiate a right click can be adjusted by altering the compareReportCounter check.
+    //  TO DO - build in some tolerance for slight movement.
+    //  TODO(Nate): Refactor single press right click
+    
+    
+    if (rdesc[2] == NTRG_FINGERTOUCH && num_fingers == 1 && lastTouch < rdesc[3]) {
+        UInt16 rtempx = (rdesc[8] + (rdesc[9] << 6));
+        UInt16 rtempy = (rdesc[12] + (rdesc[13] << 6));
+        UInt16 fingerw = (rdesc[16] + (rdesc[17] << 6));
+        UInt16 fingerh = (rdesc[18] + (rdesc[19] << 6));
+        
+        if (rtempx >= (compareInputx - fingerw / 2) && rtempx <= (compareInputx + fingerw /2) && rtempy >= (compareInputy - fingerh / 2) && rtempy <= (compareInputy + fingerh / 2)) {
+            compareReportCounter = compareReportCounter + 1;
+            compareInputx = rtempx;
+            compareInputy = rtempy;            
+            if (compareReportCounter >= 120) {
+                rightClick = true;
+                compareInputx = 0;
+                compareInputy = 0;
+                compareReportCounter = 0;
+            }
+        }
+        else {
+            compareInputx = rtempx;
+            compareInputy = rtempy;
+            compareReportCounter = 0;
+        }
+        
+    }
+    
+    if (rdesc[2] == NTRG_FINGERTOUCH && num_fingers > 1 && tipSwitch && inRange){
+        if (!(lastTouch == rdesc[3])){
+            for (int i=0;i < NTRG_MAX_INPUT_LEN; i++)
+                report [i] = rdesc[i];
+            touchscreenRawInput(&softc, report, 1);
+            _wrapper->update_relative_mouse(0x0, 0, 0, 0, 0);
+        }
+    } else {
+        if (!(lastTouch == rdesc[3])){
+            if (rightClick){
+                _wrapper->update_relative_mouse(0x2, 0, 0, 0, 0);
+                rightClick = false;
+            }
+            writeInputReportToBuffer(rdesc, return_size);
+            _wrapper->update_relative_mouse(0x0, 0, 0, 0, 0);
+        }
+    }
+    lastTouch = rdesc[03];
+
+    IOFree(rdesc, rsize);
+    hid_device->timerSource->setTimeoutMS(5);
+}
+
+void VoodooNTRGDevice::writeInputReportToBuffer(unsigned char* rdesc, int return_size){
+    
+    //  int rsize = NTRG_MAX_INPUT_LEN;
+    //  IOLog("===Input (%d)===\n", rsize);
+    //  for (int i = 0; i < rsize; i++)
+    //      IOLog("0x%02x ", (UInt8) rdesc[i]);
+    //  IOLog("\n");
+    
+    
     IOBufferMemoryDescriptor *buffer = IOBufferMemoryDescriptor::inTaskWithOptions(kernel_task, 0, return_size);
     buffer->writeBytes(0, rdesc + 2, return_size - 2);
     
-    IOReturn err = _wrapper->handleReport(buffer, kIOHIDReportTypeInput);
+    IOReturn err = _wacwrapper->handleReport(buffer, kIOHIDReportTypeInput);
     if (err != kIOReturnSuccess)
         IOLog("Error handling report: 0x%.8x\n", err);
     
     buffer->release();
     
-    IOFree(rdesc, rsize);
-    
-    hid_device->timerSource->setTimeoutMS(10);
 }
 
-bool VoodooI2CHIDDevice::i2c_hid_get_report_descriptor(i2c_hid *ihid){
+void VoodooNTRGDevice::touchscreenRawInput(struct csgesture_softc *sc, uint8_t * report, int tickinc){
+    
+    // This function assembles the multitouch data and passes it to csgesture for gesture processing.
+    // The NTRG detects up to ten fingers, but the limit is currently set to five and only up to four
+    // fingers are currently processed for gestures.
+    
+    uint8_t *finger_data = &report[NTRG_FINGER_DATA_OFFSET];
+    int i;
+    
+    for (i=0;i < NTRG_MAX_FINGERS; i++) {
+        
+        sc->x[i] = -1;
+        sc->y[i] = -1;
+        sc->p[i] = -1;
+    }
+    
+    //unsigned int pos_x, pos_y;
+    unsigned int pressure = 255;
+    
+    //unsigned int tcLink = finger_data[-2];
+    int slots = finger_data[19];
+    for (int i=0; i < slots && i < NTRG_MAX_FINGERS; i++) {
+        
+        unsigned int pos_x, pos_y;
+        slots = finger_data[19];
+
+        pos_x = (finger_data[3] + (finger_data[4] << 6));
+        pos_y = (finger_data[7] + (finger_data[8] << 6));
+
+            sc->x[i] = pos_x;
+            sc->y[i] = pos_y;
+            sc->p[i] = pressure;
+        
+        unsigned int tcLink = finger_data[-2];
+        if (i < slots){
+            //lets find our exact related finger data.
+            //they would share a time counter cross input reports at rdesc[4] so -2 index diff
+            //so increment and see if we get lucky
+            for (int b = 1; b < 111; b++){ //check pointers for itterative desc
+                if (finger_data[(NTRG_MAX_INPUT_LEN - 2)] == tcLink && finger_data[NTRG_MAX_INPUT_LEN - 6] == 0x1d ){
+                    finger_data += (b + NTRG_MAX_INPUT_LEN);
+                    break;
+                }
+            }
+        }
+    }
+    
+    sc->buttondown = 0x0;
+    
+    _wrapper->ProcessGesture(sc);
+    
+}
+
+
+bool VoodooNTRGDevice::i2c_hid_get_report_descriptor(i2c_hid *ihid){
     UInt rsize;
     int ret;
     
@@ -501,7 +637,7 @@ bool VoodooI2CHIDDevice::i2c_hid_get_report_descriptor(i2c_hid *ihid){
     
 };
 
-void VoodooI2CHIDDevice::write_report_descriptor_to_buffer(IOBufferMemoryDescriptor *buffer){
+void VoodooNTRGDevice::write_report_descriptor_to_buffer(IOBufferMemoryDescriptor *buffer){
     UInt rsize;
     int ret;
     
@@ -524,16 +660,18 @@ void VoodooI2CHIDDevice::write_report_descriptor_to_buffer(IOBufferMemoryDescrip
     IOFree(rdesc, rsize);
 }
 
-bool VoodooI2CHIDDevice::i2c_hid_hwreset(i2c_hid *ihid) {
+bool VoodooNTRGDevice::i2c_hid_hwreset(i2c_hid *ihid) {
     int ret;
+    unsigned char buf[2];
     
     ret = i2c_hid_set_power(ihid, I2C_HID_PWR_ON);
     
     if (ret)
         return ret;
     
-    ret = i2c_hid_command(ihid, &hid_reset_cmd, NULL, 0);
-    if (ret) {
+    ret = i2c_hid_command(ihid, &hid_reset_cmd, buf, 2);
+    if (ret || (*buf != 0) || (*(buf+1) != 0))
+    {
         i2c_hid_set_power(ihid, I2C_HID_PWR_SLEEP);
         return ret;
     }

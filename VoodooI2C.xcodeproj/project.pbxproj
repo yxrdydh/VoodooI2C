@@ -8,6 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		308C59881BC61FD20078D1B1 /* VoodooHIDWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 308C59871BC61FD20078D1B1 /* VoodooHIDWrapper.cpp */; };
+		43183C7E1EB0880A00E045E3 /* VoodooNTRGDevice.h in Headers */ = {isa = PBXBuildFile; fileRef = 43183C7D1EB0880A00E045E3 /* VoodooNTRGDevice.h */; };
+		43183C801EB088C700E045E3 /* VoodooNTRGDevice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 43183C7F1EB088C700E045E3 /* VoodooNTRGDevice.cpp */; };
+		43183C831EB0894000E045E3 /* VoodooNTRGWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 43183C811EB0894000E045E3 /* VoodooNTRGWrapper.cpp */; };
+		43183C861EB0898400E045E3 /* VoodooNTRGWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 43183C851EB0898400E045E3 /* VoodooNTRGWrapper.h */; };
 		7D9398D01DB9234C0002B847 /* VoodooWacomDevice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7D9398CF1DB9234C0002B847 /* VoodooWacomDevice.cpp */; };
 		7D9398D31DB923CC0002B847 /* VoodooWacomWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7D9398D21DB923CC0002B847 /* VoodooWacomWrapper.cpp */; };
 		AC45AFED1A32543B008E6857 /* VoodooI2C.h in Headers */ = {isa = PBXBuildFile; fileRef = AC45AFEC1A32543B008E6857 /* VoodooI2C.h */; };
@@ -39,6 +43,10 @@
 /* Begin PBXFileReference section */
 		308C59871BC61FD20078D1B1 /* VoodooHIDWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VoodooHIDWrapper.cpp; sourceTree = "<group>"; };
 		308C59891BC61FE00078D1B1 /* VoodooHIDWrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VoodooHIDWrapper.h; sourceTree = "<group>"; };
+		43183C7D1EB0880A00E045E3 /* VoodooNTRGDevice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VoodooNTRGDevice.h; sourceTree = "<group>"; };
+		43183C7F1EB088C700E045E3 /* VoodooNTRGDevice.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VoodooNTRGDevice.cpp; sourceTree = "<group>"; };
+		43183C811EB0894000E045E3 /* VoodooNTRGWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VoodooNTRGWrapper.cpp; sourceTree = "<group>"; };
+		43183C851EB0898400E045E3 /* VoodooNTRGWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VoodooNTRGWrapper.h; sourceTree = "<group>"; };
 		7D9398CE1DB9231F0002B847 /* VoodooWacomDevice.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VoodooWacomDevice.h; sourceTree = "<group>"; };
 		7D9398CF1DB9234C0002B847 /* VoodooWacomDevice.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VoodooWacomDevice.cpp; sourceTree = "<group>"; };
 		7D9398D11DB923B10002B847 /* VoodooWacomWrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VoodooWacomWrapper.h; sourceTree = "<group>"; };
@@ -86,6 +94,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		43183C7C1EB087AB00E045E3 /* NTRG */ = {
+			isa = PBXGroup;
+			children = (
+				43183C7D1EB0880A00E045E3 /* VoodooNTRGDevice.h */,
+				43183C7F1EB088C700E045E3 /* VoodooNTRGDevice.cpp */,
+				43183C811EB0894000E045E3 /* VoodooNTRGWrapper.cpp */,
+				43183C851EB0898400E045E3 /* VoodooNTRGWrapper.h */,
+			);
+			name = NTRG;
+			sourceTree = "<group>";
+		};
 		7D9398CD1DB922E80002B847 /* Wacom */ = {
 			isa = PBXGroup;
 			children = (
@@ -101,7 +120,6 @@
 			isa = PBXGroup;
 			children = (
 				AC45AFE91A32543B008E6857 /* VoodooI2C */,
-				AC45AFE81A32543B008E6857 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
@@ -111,17 +129,19 @@
 				AC45AFE71A32543B008E6857 /* VoodooI2C.kext */,
 			);
 			name = Products;
+			path = ..;
 			sourceTree = "<group>";
 		};
 		AC45AFE91A32543B008E6857 /* VoodooI2C */ = {
 			isa = PBXGroup;
 			children = (
+				43183C7C1EB087AB00E045E3 /* NTRG */,
 				7D9398CD1DB922E80002B847 /* Wacom */,
 				AC45AFEC1A32543B008E6857 /* VoodooI2C.h */,
+				AC45AFEA1A32543B008E6857 /* Supporting Files */,
 				AC45AFEE1A32543B008E6857 /* VoodooI2C.cpp */,
 				F18F3CF91D88C1C600CCED2B /* VoodooI2CPCI.cpp */,
 				F18F3CFA1D88C1C600CCED2B /* VoodooI2CPCI.h */,
-				AC45AFEA1A32543B008E6857 /* Supporting Files */,
 				F19963071CAD6EE3002E2D29 /* VoodooI2CDevice.cpp */,
 				F19963081CAD6EE3002E2D29 /* VoodooI2CDevice.h */,
 				ACF45CF81A7FDDD0005C2BBE /* VoodooI2CHIDDevice.h */,
@@ -131,7 +151,7 @@
 				F15312101CB9B68200BE6BFC /* Cypress APA Trackpad Driver */,
 				F110CDB51D1F3B2C0057BBDB /* Elan I2C Trackpad Driver */,
 				308C59891BC61FE00078D1B1 /* VoodooHIDWrapper.h */,
-				308C59871BC61FD20078D1B1 /* VoodooHIDWrapper.cpp */,
+				AC45AFE81A32543B008E6857 /* Products */,
 			);
 			path = VoodooI2C;
 			sourceTree = "<group>";
@@ -147,6 +167,7 @@
 		F110CDB51D1F3B2C0057BBDB /* Elan I2C Trackpad Driver */ = {
 			isa = PBXGroup;
 			children = (
+				308C59871BC61FD20078D1B1 /* VoodooHIDWrapper.cpp */,
 				F110CDB61D1F3B4D0057BBDB /* VoodooElanTouchpadDevice.cpp */,
 				F1FA896E1D7FAAF10019F9CF /* csgesturescroll.h */,
 				F110CDB71D1F3B4D0057BBDB /* VoodooElanTouchpadDevice.h */,
@@ -199,11 +220,13 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				43183C861EB0898400E045E3 /* VoodooNTRGWrapper.h in Headers */,
 				F110CDBB1D1F3B4D0057BBDB /* VoodooElanTouchpadDevice.h in Headers */,
 				F1AB82D11C1E8F5E003EFE34 /* VoodooCSGestureHIDWrapper.h in Headers */,
 				F158186D1C1D6B8F0086ED55 /* VoodooCyapaGen3Device.h in Headers */,
 				F153120B1CB96C8300BE6BFC /* VoodooI2CAtmelMxtScreenDevice.h in Headers */,
 				AC45AFED1A32543B008E6857 /* VoodooI2C.h in Headers */,
+				43183C7E1EB0880A00E045E3 /* VoodooNTRGDevice.h in Headers */,
 				F18F3CFC1D88C1C600CCED2B /* VoodooI2CPCI.h in Headers */,
 				F199630A1CAD6EE3002E2D29 /* VoodooI2CDevice.h in Headers */,
 				F1FA896C1D7FAAC90019F9CF /* AverageClasses.h in Headers */,
@@ -287,10 +310,12 @@
 				308C59881BC61FD20078D1B1 /* VoodooHIDWrapper.cpp in Sources */,
 				7D9398D31DB923CC0002B847 /* VoodooWacomWrapper.cpp in Sources */,
 				ACF45CFA1A7FDE76005C2BBE /* VoodooI2CHIDDevice.cpp in Sources */,
+				43183C801EB088C700E045E3 /* VoodooNTRGDevice.cpp in Sources */,
 				F153120A1CB96C8300BE6BFC /* VoodooI2CAtmelMxtScreenDevice.cpp in Sources */,
 				7D9398D01DB9234C0002B847 /* VoodooWacomDevice.cpp in Sources */,
 				F19857311D7F80AE00BAB4BB /* VoodooCSGestureHIPointingWrapper.cpp in Sources */,
 				F191539C1D25CE14007972A7 /* csgesture.cpp in Sources */,
+				43183C831EB0894000E045E3 /* VoodooNTRGWrapper.cpp in Sources */,
 				AC45AFEF1A32543B008E6857 /* VoodooI2C.cpp in Sources */,
 				F110CDBA1D1F3B4D0057BBDB /* VoodooElanTouchpadDevice.cpp in Sources */,
 				F19963091CAD6EE3002E2D29 /* VoodooI2CDevice.cpp in Sources */,

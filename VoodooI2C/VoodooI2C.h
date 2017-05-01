@@ -12,6 +12,7 @@
 #include "VoodooElanTouchpadDevice.h"
 #include "VoodooI2CAtmelMxtScreenDevice.h"
 #include "VoodooWacomDevice.h"
+#include "VoodooNTRGDevice.h"
 
 #define kIOPMPowerOff		0
 
